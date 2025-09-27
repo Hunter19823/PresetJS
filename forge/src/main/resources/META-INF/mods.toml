@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[47,)"
-#issueTrackerURL = ""
+issueTrackerURL = "https://github.com/Hunter19823/PresetJS/issues"
 license = "MIT"
 
 [[mods]]
@@ -8,6 +8,8 @@ modId = "presetjs"
 version = "${version}"
 displayName = "PresetJS"
 authors = "ILIKEPIEFOO2"
+logoFile="icon.png"
+displayURL="https://github.com/Hunter19823/PresetJS"
 description = '''
 A KubeJS Addon for adding additional Presets
 '''

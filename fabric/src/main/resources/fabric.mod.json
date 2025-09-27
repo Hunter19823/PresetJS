@@ -8,7 +8,9 @@
     "ILIKEPIEFOO2"
   ],
   "contact": {
-    "homepage": ""
+    "homepage": "https://github.com/Hunter19823/PresetJS",
+    "issues": "https://github.com/Hunter19823/PresetJS/issues",
+    "sources": "https://github.com/Hunter19823/PresetJS"
   },
   "license": "MIT",
   "icon": "assets/presetjs/icon.png",
