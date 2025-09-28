@@ -56,11 +56,11 @@ import static net.minecraft.world.level.block.StairBlock.isStairs;
 @SuppressWarnings("JavadocReference")
 public class BlockStateModifyPlacementCallbackPresets {
 
-    private void setStateToNull(BlockStateModifyPlacementCallbackJS callback) {
+    private static void setStateToNull(BlockStateModifyPlacementCallbackJS callback) {
         ((BlockStateModifyCallbackJSAccessor) callback).setState(null);
     }
 
-    private void overrideState(BlockStateModifyPlacementCallbackJS callback, BlockState newState) {
+    private static void overrideState(BlockStateModifyPlacementCallbackJS callback, BlockState newState) {
         ((BlockStateModifyCallbackJSAccessor) callback).setState(newState);
     }
 
@@ -92,7 +92,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void faceAttachedHorizontalDirectionalBlock(BlockStateModifyPlacementCallbackJS callback) {
+    public static void faceAttachedHorizontalDirectionalBlock(BlockStateModifyPlacementCallbackJS callback) {
         for (Direction direction : callback.getNearestLookingDirections()) {
             var blockState = callback.minecraftBlock.defaultBlockState();
             if (direction.getAxis() == Direction.Axis.Y) {
@@ -127,7 +127,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void furnace(BlockStateModifyPlacementCallbackJS callback) {
+    public static void furnace(BlockStateModifyPlacementCallbackJS callback) {
         overrideState(callback, callback.minecraftBlock.defaultBlockState().setValue(AbstractFurnaceBlock.FACING, callback.getHorizontalDirection().getOpposite()));
     }
 
@@ -148,7 +148,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void amethystCluster(BlockStateModifyPlacementCallbackJS callback) {
+    public static void amethystCluster(BlockStateModifyPlacementCallbackJS callback) {
         overrideState(
             callback,
                 callback
@@ -176,7 +176,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void sculkSensor(BlockStateModifyPlacementCallbackJS callback) {
+    public static void sculkSensor(BlockStateModifyPlacementCallbackJS callback) {
         overrideState(
             callback,
             callback
@@ -201,7 +201,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void calibratedSculkSensor(BlockStateModifyPlacementCallbackJS callback) {
+    public static void calibratedSculkSensor(BlockStateModifyPlacementCallbackJS callback) {
         sculkSensor(callback); // Call the parent method to set WATERLOGGED
         callback.setValue(CalibratedSculkSensorBlock.FACING, callback.getHorizontalDirection());
     }
@@ -224,7 +224,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void campfire(BlockStateModifyPlacementCallbackJS callback) {
+    public static void campfire(BlockStateModifyPlacementCallbackJS callback) {
         boolean waterlogged = callback.isInWater();
         boolean signalFire = isSmokeSource(callback.getLevel().getBlockState(callback.getClickedPos().below()));
 
@@ -255,7 +255,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return true if the block is a smoke source
      * @see CampfireBlock#isSmokeSource(BlockState)
      */
-    private boolean isSmokeSource(BlockState blockState) {
+    private static boolean isSmokeSource(BlockState blockState) {
         return blockState.is(Blocks.HAY_BLOCK);
     }
 
@@ -273,7 +273,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void barrel(BlockStateModifyPlacementCallbackJS callback) {
+    public static void barrel(BlockStateModifyPlacementCallbackJS callback) {
         overrideState(
             callback,
             callback
@@ -297,7 +297,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void dispenser(BlockStateModifyPlacementCallbackJS callback) {
+    public static void dispenser(BlockStateModifyPlacementCallbackJS callback) {
         overrideState(
             callback,
             callback
@@ -326,7 +326,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void baseRail(BlockStateModifyPlacementCallbackJS callback, EnumProperty<RailShape> shapeProperty) {
+    public static void baseRail(BlockStateModifyPlacementCallbackJS callback, EnumProperty<RailShape> shapeProperty) {
         boolean waterlogged = callback.isInWater();
         var direction = callback.getHorizontalDirection();
         boolean flag1 = direction == Direction.EAST || direction == Direction.WEST;
@@ -348,7 +348,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void detectorRail(BlockStateModifyPlacementCallbackJS callback) {
+    public static void detectorRail(BlockStateModifyPlacementCallbackJS callback) {
         baseRail(callback, DetectorRailBlock.SHAPE);
     }
 
@@ -361,7 +361,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void poweredRail(BlockStateModifyPlacementCallbackJS callback) {
+    public static void poweredRail(BlockStateModifyPlacementCallbackJS callback) {
         baseRail(callback, PoweredRailBlock.SHAPE);
     }
 
@@ -372,7 +372,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void rail(BlockStateModifyPlacementCallbackJS callback) {
+    public static void rail(BlockStateModifyPlacementCallbackJS callback) {
         baseRail(callback, RailBlock.SHAPE);
     }
 
@@ -410,7 +410,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void chest(BlockStateModifyPlacementCallbackJS callback) {
+    public static void chest(BlockStateModifyPlacementCallbackJS callback) {
         ChestType chestType = ChestType.SINGLE;
         Direction direction = callback.getHorizontalDirection().getOpposite();
         boolean isSecondaryUse = callback.isSecondaryUseActive();
@@ -460,7 +460,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return The candidate partner facing direction
      * @see ChestBlock#candidatePartnerFacing(BlockPlaceContext, Direction)
      */
-    private Direction candidatePartnerFacing(BlockStateModifyPlacementCallbackJS callback, Direction direction) {
+    private static Direction candidatePartnerFacing(BlockStateModifyPlacementCallbackJS callback, Direction direction) {
         BlockState blockState = callback.getLevel().getBlockState(callback.getClickedPos().relative(direction));
         return blockState.is(callback.getState().getBlock()) && blockState.getValue(ChestBlock.TYPE) == ChestType.SINGLE ?
             blockState.getValue(ChestBlock.FACING) : null;
@@ -488,7 +488,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void door(BlockStateModifyPlacementCallbackJS callback) {
+    public static void door(BlockStateModifyPlacementCallbackJS callback) {
         if (callback.getClickedPos().getY() < callback.getLevel().getMaxBuildHeight() - 1 &&
             callback.getLevel().getBlockState(callback.getClickedPos().above()).canBeReplaced(callback.context)) {
 
@@ -556,7 +556,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return The hinge side
      * @see DoorBlock#getHinge(BlockPlaceContext)
      */
-    private DoorHingeSide getHinge(BlockStateModifyPlacementCallbackJS callback) {
+    private static DoorHingeSide getHinge(BlockStateModifyPlacementCallbackJS callback) {
         BlockGetter level = callback.getLevel();
         BlockPos clickedPos = callback.getClickedPos();
         Direction doorFacing = callback.getHorizontalDirection();
@@ -636,7 +636,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void slab(BlockStateModifyPlacementCallbackJS callback) {
+    public static void slab(BlockStateModifyPlacementCallbackJS callback) {
         BlockState existingState = callback.getLevel().getBlockState(callback.getClickedPos());
 
         // Check if we're placing on the same slab type to create a double slab
@@ -685,7 +685,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void observer(BlockStateModifyPlacementCallbackJS callback) {
+    public static void observer(BlockStateModifyPlacementCallbackJS callback) {
         overrideState(
             callback,
             callback
@@ -713,7 +713,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void stairs(BlockStateModifyPlacementCallbackJS callback) {
+    public static void stairs(BlockStateModifyPlacementCallbackJS callback) {
         Direction clickedFace = callback.getClickedFace();
         boolean waterlogged = callback.isInWater();
 
@@ -862,7 +862,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void trapdoor(BlockStateModifyPlacementCallbackJS callback) {
+    public static void trapdoor(BlockStateModifyPlacementCallbackJS callback) {
         Direction clickedFace = callback.getClickedFace();
         boolean waterlogged = callback.isInWater();
         boolean powered = callback.getLevel().hasNeighborSignal(callback.getClickedPos());
@@ -909,7 +909,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void bed(BlockStateModifyPlacementCallbackJS callback) {
+    public static void bed(BlockStateModifyPlacementCallbackJS callback) {
         Direction direction = callback.getHorizontalDirection();
         if (callback.getLevel().getBlockState(callback.getClickedPos().relative(direction)).canBeReplaced(callback.context) &&
             callback.getLevel().getWorldBorder().isWithinBounds(callback.getClickedPos().relative(direction))) {
@@ -939,7 +939,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void banner(BlockStateModifyPlacementCallbackJS callback) {
+    public static void banner(BlockStateModifyPlacementCallbackJS callback) {
         overrideState(
             callback,
             callback
@@ -973,7 +973,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void lantern(BlockStateModifyPlacementCallbackJS callback) {
+    public static void lantern(BlockStateModifyPlacementCallbackJS callback) {
         for (Direction direction : callback.getNearestLookingDirections()) {
             if (direction.getAxis() == Direction.Axis.Y) {
                 boolean hanging = direction == Direction.UP;
@@ -1020,7 +1020,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void fence(BlockStateModifyPlacementCallbackJS callback) {
+    public static void fence(BlockStateModifyPlacementCallbackJS callback) {
         BlockGetter blockGetter = callback.getLevel();
         BlockPos blockPos = callback.getClickedPos();
         boolean waterlogged = callback.isInWater();
@@ -1069,8 +1069,8 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return true if the fence connects to the block
      * @see FenceBlock#connectsTo(BlockState, boolean, Direction)
      */
-    private boolean connectsToFence(BlockState blockState, boolean isSturdyFace, Direction direction, BlockState defaultState) {
-        boolean isSameFence = this.isSameFence(blockState, defaultState);
+    private static boolean connectsToFence(BlockState blockState, boolean isSturdyFace, Direction direction, BlockState defaultState) {
+        boolean isSameFence = isSameFence(blockState, defaultState);
         // Uses tag instead of instanceof to allow for custom fence gates
         boolean isFenceGate = blockState.is(BlockTags.FENCE_GATES) &&
             FenceGateBlock.connectsToDirection(blockState, direction);
@@ -1094,7 +1094,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return true if the block is the same type of fence
      * @see FenceBlock#isSameFence(BlockState)
      */
-    private boolean isSameFence(BlockState blockState, BlockState defaultState) {
+    private static boolean isSameFence(BlockState blockState, BlockState defaultState) {
         return blockState.is(BlockTags.FENCES)
             // I assume this is to see if they are the same type of material (wooden or not)
             && blockState.is(BlockTags.WOODEN_FENCES) == defaultState.is(BlockTags.WOODEN_FENCES);
@@ -1116,7 +1116,8 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return true if the block is an exception for fence connection
      * @see Block#isExceptionForConnection(BlockState)
      */
-    private boolean isExceptionForConnection(BlockState blockState) {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private static boolean isExceptionForConnection(BlockState blockState) {
         // Uses tag instead of instanceof to allow for custom leaves
         return blockState.is(BlockTags.LEAVES) ||
             blockState.is(Blocks.BARRIER) ||
@@ -1147,7 +1148,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void fenceGate(BlockStateModifyPlacementCallbackJS callback) {
+    public static void fenceGate(BlockStateModifyPlacementCallbackJS callback) {
         boolean powered = callback.getLevel().hasNeighborSignal(callback.getClickedPos());
         Direction direction = callback.getHorizontalDirection();
         Direction.Axis axis = direction.getAxis();
@@ -1187,7 +1188,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return true if the block is a wall
      * @see FenceGateBlock#isWall(BlockState)
      */
-    private boolean isWall(BlockState blockState) {
+    private static boolean isWall(BlockState blockState) {
         return blockState.is(BlockTags.WALLS);
     }
 
@@ -1211,7 +1212,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return true if the wall connects to the block
      * @see WallBlock#connectsTo(BlockState, boolean, Direction)
      */
-    private boolean connectsToWall(BlockState blockState, boolean isSturdyFace, Direction direction, BlockState defaultState) {
+    private static boolean connectsToWall(BlockState blockState, boolean isSturdyFace, Direction direction, BlockState defaultState) {
         Block block = blockState.getBlock();
         // Uses tag instead of instanceof to allow for custom fence gates
         boolean isFenceGate = blockState.is(BlockTags.FENCE_GATES) &&
@@ -1255,7 +1256,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      */
-    public void wall(BlockStateModifyPlacementCallbackJS callback) {
+    public static void wall(BlockStateModifyPlacementCallbackJS callback) {
         LevelReader levelReader = callback.getLevel();
         BlockPos blockPos = callback.getClickedPos();
         boolean waterlogged = callback.isInWater();
@@ -1307,7 +1308,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param aboveShape The collision shape of the block above
      * @see WallBlock#updateSides(BlockState, boolean, boolean, boolean, boolean, VoxelShape)
      */
-    private void updateWallSides(BlockStateModifyPlacementCallbackJS callback, boolean northConnects, boolean eastConnects, boolean southConnects, boolean westConnects, VoxelShape aboveShape) {
+    private static void updateWallSides(BlockStateModifyPlacementCallbackJS callback, boolean northConnects, boolean eastConnects, boolean southConnects, boolean westConnects, VoxelShape aboveShape) {
         // Create simple test shapes for wall connections
         VoxelShape northTest = Block.box(7, 0, 0, 9, 16, 8);
         VoxelShape eastTest = Block.box(8, 0, 7, 16, 16, 9);
@@ -1342,7 +1343,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return The wall side state
      * @see WallBlock#makeWallState(boolean, VoxelShape, VoxelShape)
      */
-    private WallSide makeWallState(boolean connects, VoxelShape aboveShape, VoxelShape testShape) {
+    private static WallSide makeWallState(boolean connects, VoxelShape aboveShape, VoxelShape testShape) {
         if (connects) {
             return isCovered(aboveShape, testShape) ? WallSide.TALL : WallSide.LOW;
         } else {
@@ -1366,7 +1367,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return true if shape1 is covered by shape2
      * @see WallBlock#isCovered(VoxelShape, VoxelShape)
      */
-    private boolean isCovered(VoxelShape shape1, VoxelShape shape2) {
+    private static boolean isCovered(VoxelShape shape1, VoxelShape shape2) {
         return !shape1.isEmpty() && !shape2.isEmpty() && shape1.bounds().intersects(shape2.bounds());
     }
 
@@ -1405,7 +1406,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return true if the post should be raised
      * @see WallBlock#shouldRaisePost(BlockState, BlockState, VoxelShape)
      */
-    private boolean shouldRaiseWallPost(BlockState state, BlockState aboveState, VoxelShape aboveShape) {
+    private static boolean shouldRaiseWallPost(BlockState state, BlockState aboveState, VoxelShape aboveShape) {
         // Check if the block above is a wall with UP=true
         if (aboveState.getBlock() instanceof WallBlock && aboveState.getValue(WallBlock.UP)) {
             return true;
