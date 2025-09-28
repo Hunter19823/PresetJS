@@ -1865,5 +1865,423 @@ public class BlockStateModifyPlacementCallbackPresets {
         }
     }
 
+    /**
+     * Represents the implementation within {@link AnvilBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     return (BlockState)this.defaultBlockState().setValue(FACING, arg.getHorizontalDirection().getClockWise());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void anvil(BlockStateModifyPlacementCallbackJS callback) {
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(AnvilBlock.FACING, callback.getHorizontalDirection().getClockWise())
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link BlastFurnaceBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code inherited from {@link AbstractFurnaceBlock#getStateForPlacement(BlockPlaceContext)}
+     *
+     * @param callback The callback instance
+     */
+    public static void blastFurnace(BlockStateModifyPlacementCallbackJS callback) {
+        furnace(callback); // BlastFurnaceBlock extends AbstractFurnaceBlock
+    }
+
+    /**
+     * Represents the implementation within {@link BrewingStandBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference: BrewingStandBlock doesn't override getStateForPlacement, so it uses the default
+     *
+     * @param callback The callback instance
+     */
+    public static void brewingStand(BlockStateModifyPlacementCallbackJS callback) {
+        // BrewingStandBlock doesn't override getStateForPlacement, so it uses the default block state
+        overrideState(callback, callback.minecraftBlock.defaultBlockState());
+    }
+
+    /**
+     * Represents the implementation within {@link CraftingTableBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference: CraftingTableBlock doesn't override getStateForPlacement, so it uses the default
+     *
+     * @param callback The callback instance
+     */
+    public static void craftingTable(BlockStateModifyPlacementCallbackJS callback) {
+        // CraftingTableBlock doesn't override getStateForPlacement, so it uses the default block state
+        overrideState(callback, callback.minecraftBlock.defaultBlockState());
+    }
+
+    /**
+     * Represents the implementation within {@link BigDripleafBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     BlockState blockState = arg.getLevel().getBlockState(arg.getClickedPos().below());
+     *     FluidState fluidState = arg.getLevel().getFluidState(arg.getClickedPos());
+     *     boolean bl = blockState.is(Blocks.BIG_DRIPLEAF) || blockState.is(Blocks.BIG_DRIPLEAF_STEM);
+     *     return (BlockState)((BlockState)this.defaultBlockState().setValue(WATERLOGGED, fluidState.isSourceOfType(Fluids.WATER))).setValue(FACING, bl ? (Direction)blockState.getValue(FACING) : arg.getHorizontalDirection().getOpposite());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void bigDripleaf(BlockStateModifyPlacementCallbackJS callback) {
+        BlockState belowState = callback.getLevel().getBlockState(callback.getClickedPos().below());
+        boolean waterlogged = callback.isInWater();
+        boolean isOnDripleaf = belowState.is(Blocks.BIG_DRIPLEAF) || belowState.is(Blocks.BIG_DRIPLEAF_STEM);
+        
+        Direction facing = isOnDripleaf ? belowState.getValue(HorizontalDirectionalBlock.FACING) : callback.getHorizontalDirection().getOpposite();
+        
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(BlockStateProperties.WATERLOGGED, waterlogged)
+                .setValue(HorizontalDirectionalBlock.FACING, facing)
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link CarvedPumpkinBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     return (BlockState)this.defaultBlockState().setValue(FACING, arg.getHorizontalDirection().getOpposite());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void carvedPumpkin(BlockStateModifyPlacementCallbackJS callback) {
+        facingOppositeOfHorizontalDirection(callback, HorizontalDirectionalBlock.FACING);
+    }
+
+    /**
+     * Represents the implementation within {@link ChiseledBookShelfBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     return (BlockState)this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, arg.getHorizontalDirection().getOpposite());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void chiseledBookShelf(BlockStateModifyPlacementCallbackJS callback) {
+        facingOppositeOfHorizontalDirection(callback, HorizontalDirectionalBlock.FACING);
+    }
+
+    /**
+     * Represents the implementation within {@link CommandBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     return (BlockState)this.defaultBlockState().setValue(FACING, arg.getNearestLookingDirection().getOpposite());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void commandBlock(BlockStateModifyPlacementCallbackJS callback) {
+        oppositeNearestLookingDirection(callback, CommandBlock.FACING);
+    }
+
+    /**
+     * Represents the implementation within {@link ComparatorBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference: ComparatorBlock extends DiodeBlock which has complex placement logic
+     *
+     * @param callback The callback instance
+     */
+    public static void comparator(BlockStateModifyPlacementCallbackJS callback) {
+        // ComparatorBlock extends DiodeBlock, so it uses DiodeBlock's placement logic
+        // This is a simplified version - the actual implementation is more complex
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(BlockStateProperties.FACING, callback.getHorizontalDirection())
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link ComposterBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference: ComposterBlock doesn't override getStateForPlacement, so it uses the default
+     *
+     * @param callback The callback instance
+     */
+    public static void composter(BlockStateModifyPlacementCallbackJS callback) {
+        // ComposterBlock doesn't override getStateForPlacement, so it uses the default block state
+        overrideState(callback, callback.minecraftBlock.defaultBlockState());
+    }
+
+    /**
+     * Represents the implementation within {@link ConduitBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     FluidState fluidState = arg.getLevel().getFluidState(arg.getClickedPos());
+     *     return (BlockState)this.defaultBlockState().setValue(WATERLOGGED, fluidState.is(FluidTags.WATER) && fluidState.getAmount() == 8);
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void conduit(BlockStateModifyPlacementCallbackJS callback) {
+        // ConduitBlock sets WATERLOGGED based on water fluid state
+        boolean waterlogged = callback.isInWater();
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(BlockStateProperties.WATERLOGGED, waterlogged)
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link CocoaBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     BlockState blockstate = this.defaultBlockState();
+     *     LevelReader levelreader = arg.getLevel();
+     *     BlockPos blockpos = arg.getClickedPos();
+     *     for(Direction direction : arg.getNearestLookingDirections()) {
+     *         if (direction.getAxis().isHorizontal()) {
+     *             blockstate = (BlockState)blockstate.setValue(FACING, direction);
+     *             if (blockstate.canSurvive(levelreader, blockpos)) {
+     *                 return blockstate;
+     *             }
+     *         }
+     *     }
+     *     return null;
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void cocoa(BlockStateModifyPlacementCallbackJS callback) {
+        for (Direction direction : callback.getNearestLookingDirections()) {
+            if (direction.getAxis().isHorizontal()) {
+                var state = callback
+                    .minecraftBlock
+                    .defaultBlockState()
+                    .setValue(HorizontalDirectionalBlock.FACING, direction);
+                
+                if (state.canSurvive(callback.getLevel(), callback.getClickedPos())) {
+                    overrideState(callback, state);
+                    return;
+                }
+            }
+        }
+        setStateToNull(callback);
+    }
+
+
+    /**
+     * Represents the implementation within {@link DaylightDetectorBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference: DaylightDetectorBlock doesn't override getStateForPlacement, so it uses the default
+     *
+     * @param callback The callback instance
+     */
+    public static void daylightDetector(BlockStateModifyPlacementCallbackJS callback) {
+        // DaylightDetectorBlock doesn't override getStateForPlacement, so it uses the default block state
+        overrideState(callback, callback.minecraftBlock.defaultBlockState());
+    }
+
+    /**
+     * Represents the implementation within {@link DeadBushBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference: DeadBushBlock doesn't override getStateForPlacement, so it uses the default
+     *
+     * @param callback The callback instance
+     */
+    public static void deadBush(BlockStateModifyPlacementCallbackJS callback) {
+        // DeadBushBlock doesn't override getStateForPlacement, so it uses the default block state
+        overrideState(callback, callback.minecraftBlock.defaultBlockState());
+    }
+
+    /**
+     * Represents the implementation within {@link DecoratedPotBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     FluidState fluidState = arg.getLevel().getFluidState(arg.getClickedPos());
+     *     return (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(HORIZONTAL_FACING, arg.getHorizontalDirection())).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER)).setValue(CRACKED, false);
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void decoratedPot(BlockStateModifyPlacementCallbackJS callback) {
+        // DecoratedPotBlock sets HORIZONTAL_FACING, WATERLOGGED, and CRACKED properties
+        boolean waterlogged = callback.isInWater();
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(BlockStateProperties.HORIZONTAL_FACING, callback.getHorizontalDirection())
+                .setValue(BlockStateProperties.WATERLOGGED, waterlogged)
+                .setValue(BlockStateProperties.CRACKED, false)
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link DropperBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference: DropperBlock extends DispenserBlock, so it uses the same placement logic
+     *
+     * @param callback The callback instance
+     */
+    public static void dropper(BlockStateModifyPlacementCallbackJS callback) {
+        dispenser(callback); // DropperBlock extends DispenserBlock
+    }
+
+    /**
+     * Represents the implementation within {@link EnderChestBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     FluidState fluidState = arg.getLevel().getFluidState(arg.getClickedPos());
+     *     return (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, arg.getHorizontalDirection().getOpposite())).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void enderChest(BlockStateModifyPlacementCallbackJS callback) {
+        // EnderChestBlock sets FACING and WATERLOGGED properties
+        boolean waterlogged = callback.isInWater();
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(HorizontalDirectionalBlock.FACING, callback.getHorizontalDirection().getOpposite())
+                .setValue(BlockStateProperties.WATERLOGGED, waterlogged)
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link EndPortalFrameBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     return (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, arg.getHorizontalDirection().getOpposite())).setValue(HAS_EYE, false);
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void endPortalFrame(BlockStateModifyPlacementCallbackJS callback) {
+        // EndPortalFrameBlock sets FACING and HAS_EYE properties
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(HorizontalDirectionalBlock.FACING, callback.getHorizontalDirection().getOpposite())
+                .setValue(BlockStateProperties.EYE, false)
+        );
+    }
+
+
+
+    /**
+     * Represents the implementation within {@link GlazedTerracottaBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     return (BlockState)this.defaultBlockState().setValue(FACING, arg.getHorizontalDirection().getOpposite());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void glazedTerracotta(BlockStateModifyPlacementCallbackJS callback) {
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(HorizontalDirectionalBlock.FACING, callback.getHorizontalDirection().getOpposite())
+        );
+    }
+
+
+    /**
+     * Represents the implementation within {@link InfestedRotatedPillarBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     return (BlockState)this.defaultBlockState().setValue(RotatedPillarBlock.AXIS, arg.getClickedFace().getAxis());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void infestedRotatedPillar(BlockStateModifyPlacementCallbackJS callback) {
+        // InfestedRotatedPillarBlock sets AXIS based on clicked face
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(BlockStateProperties.AXIS, callback.getClickedFace().getAxis())
+        );
+    }
+
 
 }
