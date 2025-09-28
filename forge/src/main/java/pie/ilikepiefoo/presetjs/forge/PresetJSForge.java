@@ -8,13 +8,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Mod(PresetJS.MOD_ID)
 public final class PresetJSForge {
 
-    public PresetJSForge() {
+    public PresetJSForge(FMLJavaModLoadingContext context) {
         // Submit our event bus to let Architectury API register our content on the right time.
-        EventBuses.registerModEventBus(PresetJS.MOD_ID,
-            FMLJavaModLoadingContext
-                .get()
-                .getModEventBus()
-        );
+        EventBuses.registerModEventBus(PresetJS.MOD_ID, context.getModEventBus());
 
         // Run our common setup.
         PresetJS.init();

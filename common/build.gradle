@@ -1,3 +1,6 @@
+def loader = "fabric"
+def Loader = "Fabric"
+
 architectury {
     common rootProject.enabled_platforms.split(',')
 }
@@ -9,4 +12,10 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
     modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
+
+    // KubeJS
+    modApi "dev.latvian.mods:kubejs:${kubejs_version}"
+
+    // Mixin Extras
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-${loader}:${rootProject.mixin_extras}"))
 }

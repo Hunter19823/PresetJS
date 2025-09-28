@@ -11,6 +11,43 @@ architectury {
 allprojects {
     group = rootProject.maven_group
     version = rootProject.mod_version
+
+    repositories {
+
+        // Architectury
+        maven {
+            // Shedaniel's maven (Architectury API)
+            url = "https://maven.architectury.dev"
+            content {
+                includeGroup "me.shedaniel"
+            }
+        }
+
+        // KubeJS & Rhino
+        maven {
+            // saps.dev Maven (KubeJS and Rhino)
+            url = "https://maven.latvian.dev/releases"
+            content {
+                includeGroup "dev.latvian.mods"
+            }
+        }
+
+        // For any external mods.
+        maven {
+            url "https://www.cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+
+        // jitpack (mixinextras only)
+        maven {
+            url "https://jitpack.io"
+            content {
+                includeGroup "com.github.llamalad7.mixinextras"
+            }
+        }
+    }
 }
 
 subprojects {
@@ -23,12 +60,12 @@ subprojects {
         archivesName = "$rootProject.archives_name-$project.name"
     }
 
-    repositories {
-        // Add repositories to retrieve artifacts from in here.
-        // You should only use this when depending on other mods because
-        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-        // for more information about repositories.
+    processResources {
+        outputs.upToDateWhen { false }
+
+        filesMatching(["META-INF/mods.toml", "pack.mcmeta", "fabric.mod.json"]) {
+            expand project.properties
+        }
     }
 
     dependencies {
@@ -47,7 +84,9 @@ subprojects {
     }
 
     tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = "UTF-8"
         it.options.release = 17
+        it.options.compilerArgs << '-parameters'
     }
 
     // Configure Maven publishing.
