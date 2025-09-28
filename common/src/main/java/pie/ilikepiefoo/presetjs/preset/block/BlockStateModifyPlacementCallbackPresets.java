@@ -8,27 +8,35 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
 import net.minecraft.world.level.block.BannerBlock;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.BellBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CalibratedSculkSensorBlock;
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.ChainBlock;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.DetectorRailBlock;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.EndRodBlock;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.NoteBlock;
 import net.minecraft.world.level.block.ObserverBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.RailBlock;
+import net.minecraft.world.level.block.RodBlock;
 import net.minecraft.world.level.block.SculkSensorBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
@@ -36,11 +44,13 @@ import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.BellAttachType;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.block.state.properties.SlabType;
@@ -1427,6 +1437,364 @@ public class BlockStateModifyPlacementCallbackPresets {
         return (northNone && southNone && eastNone && westNone) || 
                (northNone != southNone) || 
                (eastNone != westNone);
+    }
+
+    /**
+     * Represents the implementation within {@link BambooStalkBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * @Nullable
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     FluidState fluidstate = arg.getLevel().getFluidState(arg.getClickedPos());
+     *     if (!fluidstate.isEmpty()) {
+     *         return null;
+     *     } else {
+     *         BlockState blockstate = arg.getLevel().getBlockState(arg.getClickedPos().below());
+     *         if (blockstate.is(BlockTags.BAMBOO_PLANTABLE_ON)) {
+     *             if (blockstate.is(Blocks.BAMBOO_SAPLING)) {
+     *                 return (BlockState)this.defaultBlockState().setValue(AGE, 0);
+     *             } else if (blockstate.is(Blocks.BAMBOO)) {
+     *                 int i = (Integer)blockstate.getValue(AGE) > 0 ? 1 : 0;
+     *                 return (BlockState)this.defaultBlockState().setValue(AGE, i);
+     *             } else {
+     *                 BlockState blockstate1 = arg.getLevel().getBlockState(arg.getClickedPos().above());
+     *                 return blockstate1.is(Blocks.BAMBOO) ? (BlockState)this.defaultBlockState().setValue(AGE, (Integer)blockstate1.getValue(AGE)) : Blocks.BAMBOO_SAPLING.defaultBlockState();
+     *             }
+     *         } else {
+     *             return null;
+     *         }
+     *     }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void bambooStalk(BlockStateModifyPlacementCallbackJS callback) {
+        if (!callback.getLevel().getFluidState(callback.getClickedPos()).isEmpty()) {
+            setStateToNull(callback);
+            return;
+        }
+
+        BlockState belowState = callback.getLevel().getBlockState(callback.getClickedPos().below());
+        if (belowState.is(BlockTags.BAMBOO_PLANTABLE_ON)) {
+            if (belowState.is(Blocks.BAMBOO_SAPLING)) {
+                overrideState(
+                    callback,
+                    callback
+                        .minecraftBlock
+                        .defaultBlockState()
+                        .setValue(BambooStalkBlock.AGE, 0)
+                );
+            } else if (belowState.is(Blocks.BAMBOO)) {
+                int age = belowState.getValue(BambooStalkBlock.AGE) > 0 ? 1 : 0;
+                overrideState(
+                    callback,
+                    callback
+                        .minecraftBlock
+                        .defaultBlockState()
+                        .setValue(BambooStalkBlock.AGE, age)
+                );
+            } else {
+                BlockState aboveState = callback.getLevel().getBlockState(callback.getClickedPos().above());
+                if (aboveState.is(Blocks.BAMBOO)) {
+                    overrideState(
+                        callback,
+                        callback
+                            .minecraftBlock
+                            .defaultBlockState()
+                            .setValue(BambooStalkBlock.AGE, aboveState.getValue(BambooStalkBlock.AGE))
+                    );
+                } else {
+                    overrideState(callback, Blocks.BAMBOO_SAPLING.defaultBlockState());
+                }
+            }
+        } else {
+            setStateToNull(callback);
+        }
+    }
+
+    /**
+     * Represents the implementation within {@link BellBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * @Nullable
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     Direction direction = arg.getClickedFace();
+     *     BlockPos blockPos = arg.getClickedPos();
+     *     Level level = arg.getLevel();
+     *     Direction.Axis axis = direction.getAxis();
+     *     if (axis == Direction.Axis.Y) {
+     *         BlockState blockState = (BlockState)((BlockState)this.defaultBlockState().setValue(ATTACHMENT, direction == Direction.DOWN ? BellAttachType.CEILING : BellAttachType.FLOOR)).setValue(FACING, arg.getHorizontalDirection());
+     *         if (blockState.canSurvive(arg.getLevel(), blockPos)) {
+     *             return blockState;
+     *         }
+     *     } else {
+     *         boolean bl = axis == Direction.Axis.X && level.getBlockState(blockPos.west()).isFaceSturdy(level, blockPos.west(), Direction.EAST) && level.getBlockState(blockPos.east()).isFaceSturdy(level, blockPos.east(), Direction.WEST) || axis == Direction.Axis.Z && level.getBlockState(blockPos.north()).isFaceSturdy(level, blockPos.north(), Direction.SOUTH) && level.getBlockState(blockPos.south()).isFaceSturdy(level, blockPos.south(), Direction.NORTH);
+     *         BlockState blockState = (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, direction.getOpposite())).setValue(ATTACHMENT, bl ? BellAttachType.DOUBLE_WALL : BellAttachType.SINGLE_WALL);
+     *         if (blockState.canSurvive(arg.getLevel(), arg.getClickedPos())) {
+     *             return blockState;
+     *         }
+     *
+     *         boolean bl2 = level.getBlockState(blockPos.below()).isFaceSturdy(level, blockPos.below(), Direction.UP);
+     *         blockState = (BlockState)blockState.setValue(ATTACHMENT, bl2 ? BellAttachType.FLOOR : BellAttachType.CEILING);
+     *         if (blockState.canSurvive(arg.getLevel(), arg.getClickedPos())) {
+     *             return blockState;
+     *         }
+     *     }
+     *
+     *     return null;
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void bell(BlockStateModifyPlacementCallbackJS callback) {
+        Direction clickedFace = callback.getClickedFace();
+        BlockPos clickedPos = callback.getClickedPos();
+        Direction.Axis axis = clickedFace.getAxis();
+
+        if (axis == Direction.Axis.Y) {
+            BellAttachType attachment = clickedFace == Direction.DOWN ? BellAttachType.CEILING : BellAttachType.FLOOR;
+            var state = callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(BellBlock.ATTACHMENT, attachment)
+                .setValue(BellBlock.FACING, callback.getHorizontalDirection());
+
+            if (state.canSurvive(callback.getLevel(), clickedPos)) {
+                overrideState(callback, state);
+                return;
+            }
+        } else {
+            // Check for double wall attachment
+            boolean isDoubleWall = false;
+            if (axis == Direction.Axis.X) {
+                isDoubleWall = callback.getLevel().getBlockState(clickedPos.west()).isFaceSturdy(callback.getLevel(), clickedPos.west(), Direction.EAST) &&
+                              callback.getLevel().getBlockState(clickedPos.east()).isFaceSturdy(callback.getLevel(), clickedPos.east(), Direction.WEST);
+            } else if (axis == Direction.Axis.Z) {
+                isDoubleWall = callback.getLevel().getBlockState(clickedPos.north()).isFaceSturdy(callback.getLevel(), clickedPos.north(), Direction.SOUTH) &&
+                              callback.getLevel().getBlockState(clickedPos.south()).isFaceSturdy(callback.getLevel(), clickedPos.south(), Direction.NORTH);
+            }
+
+            var state = callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(BellBlock.FACING, clickedFace.getOpposite())
+                .setValue(BellBlock.ATTACHMENT, isDoubleWall ? BellAttachType.DOUBLE_WALL : BellAttachType.SINGLE_WALL);
+
+            if (state.canSurvive(callback.getLevel(), clickedPos)) {
+                overrideState(callback, state);
+                return;
+            }
+
+            // Try floor/ceiling attachment
+            boolean isFloor = callback.getLevel().getBlockState(clickedPos.below()).isFaceSturdy(callback.getLevel(), clickedPos.below(), Direction.UP);
+            state = state.setValue(BellBlock.ATTACHMENT, isFloor ? BellAttachType.FLOOR : BellAttachType.CEILING);
+
+            if (state.canSurvive(callback.getLevel(), clickedPos)) {
+                overrideState(callback, state);
+                return;
+            }
+        }
+
+        setStateToNull(callback);
+    }
+
+    /**
+     * Represents the implementation within {@link CandleBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     BlockState blockState = arg.getLevel().getBlockState(arg.getClickedPos());
+     *     if (blockState.is(this)) {
+     *         return (BlockState)blockState.cycle(CANDLES);
+     *     } else {
+     *         FluidState fluidState = arg.getLevel().getFluidState(arg.getClickedPos());
+     *         boolean bl = fluidState.getType() == Fluids.WATER;
+     *         return (BlockState)super.getStateForPlacement(arg).setValue(WATERLOGGED, bl);
+     *     }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void candle(BlockStateModifyPlacementCallbackJS callback) {
+        BlockState existingState = callback.getLevel().getBlockState(callback.getClickedPos());
+        
+        if (existingState.is(callback.getState().getBlock())) {
+            // Cycle the number of candles
+            overrideState(callback, existingState.cycle(CandleBlock.CANDLES));
+        } else {
+            // Place new candle with waterlogging
+            boolean waterlogged = callback.isInWater();
+            overrideState(
+                callback,
+                callback
+                    .minecraftBlock
+                    .defaultBlockState()
+                    .setValue(CandleBlock.WATERLOGGED, waterlogged)
+            );
+        }
+    }
+
+    /**
+     * Represents the implementation within {@link ChainBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * @Nullable
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     FluidState fluidState = arg.getLevel().getFluidState(arg.getClickedPos());
+     *     boolean bl = fluidState.getType() == Fluids.WATER;
+     *     return (BlockState)super.getStateForPlacement(arg).setValue(WATERLOGGED, bl);
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void chain(BlockStateModifyPlacementCallbackJS callback) {
+        boolean waterlogged = callback.isInWater();
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(ChainBlock.WATERLOGGED, waterlogged)
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link EndRodBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     Direction direction = arg.getClickedFace();
+     *     BlockState blockState = arg.getLevel().getBlockState(arg.getClickedPos().relative(direction.getOpposite()));
+     *     return blockState.is(this) && blockState.getValue(FACING) == direction ? (BlockState)this.defaultBlockState().setValue(FACING, direction.getOpposite()) : (BlockState)this.defaultBlockState().setValue(FACING, direction);
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void endRod(BlockStateModifyPlacementCallbackJS callback) {
+        Direction clickedFace = callback.getClickedFace();
+        BlockState adjacentState = callback.getLevel().getBlockState(callback.getClickedPos().relative(clickedFace.getOpposite()));
+        
+        Direction facing;
+        if (adjacentState.is(callback.getState().getBlock()) && 
+            adjacentState.getValue(RodBlock.FACING) == clickedFace) {
+            facing = clickedFace.getOpposite();
+        } else {
+            facing = clickedFace;
+        }
+
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(RodBlock.FACING, facing)
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link HopperBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     Direction direction = arg.getClickedFace().getOpposite();
+     *     return (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, direction.getAxis() == Direction.Axis.Y ? Direction.DOWN : direction)).setValue(ENABLED, true);
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void hopper(BlockStateModifyPlacementCallbackJS callback) {
+        Direction clickedFace = callback.getClickedFace().getOpposite();
+        Direction facing = clickedFace.getAxis() == Direction.Axis.Y ? Direction.DOWN : clickedFace;
+
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(HopperBlock.FACING, facing)
+                .setValue(HopperBlock.ENABLED, true)
+        );
+    }
+
+    /**
+     * Represents the implementation within {@link NoteBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     return this.setInstrument(arg.getLevel(), arg.getClickedPos(), this.defaultBlockState());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void noteBlock(BlockStateModifyPlacementCallbackJS callback) {
+        // Set instrument based on surrounding blocks
+        NoteBlockInstrument instrument = setNoteBlockInstrument(callback.getLevel(), callback.getClickedPos());
+        
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(NoteBlock.INSTRUMENT, instrument)
+        );
+    }
+
+    /**
+     * Helper method to determine the note block instrument based on surrounding blocks
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private BlockState setInstrument(LevelAccessor arg, BlockPos arg2, BlockState arg3) {
+     *     NoteBlockInstrument noteblockinstrument = arg.getBlockState(arg2.above()).instrument();
+     *     if (noteblockinstrument.worksAboveNoteBlock()) {
+     *         return (BlockState)arg3.setValue(INSTRUMENT, noteblockinstrument);
+     *     } else {
+     *         NoteBlockInstrument noteblockinstrument1 = arg.getBlockState(arg2.below()).instrument();
+     *         NoteBlockInstrument noteblockinstrument2 = noteblockinstrument1.worksAboveNoteBlock() ? NoteBlockInstrument.HARP : noteblockinstrument1;
+     *         return (BlockState)arg3.setValue(INSTRUMENT, noteblockinstrument2);
+     *     }
+     * }
+     * }
+     * </pre>
+     * @param level The level
+     * @param pos The position
+     * @return The determined instrument
+     * @see NoteBlock#setInstrument(LevelAccessor, BlockPos, BlockState)
+     */
+    private static NoteBlockInstrument setNoteBlockInstrument(LevelReader level, BlockPos pos) {
+        NoteBlockInstrument aboveInstrument = level.getBlockState(pos.above()).instrument();
+        if (aboveInstrument.worksAboveNoteBlock()) {
+            return aboveInstrument;
+        } else {
+            NoteBlockInstrument belowInstrument = level.getBlockState(pos.below()).instrument();
+            return belowInstrument.worksAboveNoteBlock() ? NoteBlockInstrument.HARP : belowInstrument;
+        }
     }
 
 

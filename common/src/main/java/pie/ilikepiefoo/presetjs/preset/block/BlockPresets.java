@@ -29,4 +29,11 @@ public class BlockPresets {
     public static final Consumer<BlockStateModifyPlacementCallbackJS> FENCE = BlockStateModifyPlacementCallbackPresets::fence;
     public static final Consumer<BlockStateModifyPlacementCallbackJS> FENCE_GATE = BlockStateModifyPlacementCallbackPresets::fenceGate;
     public static final Consumer<BlockStateModifyPlacementCallbackJS> WALL = BlockStateModifyPlacementCallbackPresets::wall;
+    public static final Consumer<BlockStateModifyPlacementCallbackJS> BAMBOO_STALK = BlockStateModifyPlacementCallbackPresets::bambooStalk;
+    public static final Consumer<BlockStateModifyPlacementCallbackJS> BELL = BlockStateModifyPlacementCallbackPresets::bell;
+    public static final Consumer<BlockStateModifyPlacementCallbackJS> CANDLE = BlockStateModifyPlacementCallbackPresets::candle;
+    public static final Consumer<BlockStateModifyPlacementCallbackJS> CHAIN = BlockStateModifyPlacementCallbackPresets::chain;
+    public static final Consumer<BlockStateModifyPlacementCallbackJS> END_ROD = BlockStateModifyPlacementCallbackPresets::endRod;
+    public static final Consumer<BlockStateModifyPlacementCallbackJS> HOPPER = BlockStateModifyPlacementCallbackPresets::hopper;
+    public static final Consumer<BlockStateModifyPlacementCallbackJS> NOTE_BLOCK = BlockStateModifyPlacementCallbackPresets::noteBlock;
 }
