@@ -7,6 +7,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(BlockStateModifyCallbackJS.class)
 public interface BlockStateModifyCallbackJSAccessor {
-    @Accessor
-    void setState(BlockState state);
+    @Accessor("state")
+    void presetjs$setState(BlockState state);
 }
