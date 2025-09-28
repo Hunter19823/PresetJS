@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.ObserverBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.RailBlock;
@@ -38,19 +37,23 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.ChestType;
-import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.block.state.properties.StairsShape;
+import net.minecraft.world.level.block.state.properties.WallSide;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import pie.ilikepiefoo.presetjs.mixin.BlockStateModifyCallbackJSAccessor;
 
-import static net.minecraft.world.level.block.Block.isExceptionForConnection;
 import static net.minecraft.world.level.block.StairBlock.isStairs;
 
+@SuppressWarnings("JavadocReference")
 public class BlockStateModifyPlacementCallbackPresets {
 
     private void setStateToNull(BlockStateModifyPlacementCallbackJS callback) {
@@ -239,9 +242,18 @@ public class BlockStateModifyPlacementCallbackPresets {
 
     /**
      * Helper method to check if a block is a smoke source (used by campfire)
-     *
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private boolean isSmokeSource(BlockState blockState) {
+     *     return blockState.is(Blocks.HAY_BLOCK);
+     * }
+     * }
+     * </pre>
      * @param blockState The block state to check
      * @return true if the block is a smoke source
+     * @see CampfireBlock#isSmokeSource(BlockState)
      */
     private boolean isSmokeSource(BlockState blockState) {
         return blockState.is(Blocks.HAY_BLOCK);
@@ -433,10 +445,20 @@ public class BlockStateModifyPlacementCallbackPresets {
 
     /**
      * Helper method to find candidate partner facing for chest placement
-     *
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private Direction candidatePartnerFacing(BlockPlaceContext arg, Direction direction) {
+     *     BlockState blockState = arg.getLevel().getBlockState(arg.getClickedPos().relative(direction));
+     *     return blockState.is(this) && blockState.getValue(TYPE) == ChestType.SINGLE ? blockState.getValue(FACING) : null;
+     * }
+     * }
+     * </pre>
      * @param callback  The callback instance
      * @param direction The direction to check
      * @return The candidate partner facing direction
+     * @see ChestBlock#candidatePartnerFacing(BlockPlaceContext, Direction)
      */
     private Direction candidatePartnerFacing(BlockStateModifyPlacementCallbackJS callback, Direction direction) {
         BlockState blockState = callback.getLevel().getBlockState(callback.getClickedPos().relative(direction));
@@ -491,14 +513,103 @@ public class BlockStateModifyPlacementCallbackPresets {
 
     /**
      * Helper method to determine door hinge side
-     *
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private DoorHingeSide getHinge(BlockPlaceContext arg) {
+     *     BlockGetter blockGetter = arg.getLevel();
+     *     BlockPos blockPos = arg.getClickedPos();
+     *     Direction direction = arg.getHorizontalDirection();
+     *     BlockPos blockPos2 = blockPos.above();
+     *     Direction direction2 = direction.getCounterClockWise();
+     *     BlockPos blockPos3 = blockPos.relative(direction2);
+     *     BlockState blockState = blockGetter.getBlockState(blockPos3);
+     *     BlockPos blockPos4 = blockPos2.relative(direction2);
+     *     BlockState blockState2 = blockGetter.getBlockState(blockPos4);
+     *     Direction direction3 = direction.getClockWise();
+     *     BlockPos blockPos5 = blockPos.relative(direction3);
+     *     BlockState blockState3 = blockGetter.getBlockState(blockPos5);
+     *     BlockPos blockPos6 = blockPos2.relative(direction3);
+     *     BlockState blockState4 = blockGetter.getBlockState(blockPos6);
+     *     int i = (blockState.isCollisionShapeFullBlock(blockGetter, blockPos3) ? -1 : 0) + (blockState2.isCollisionShapeFullBlock(blockGetter, blockPos4) ? -1 : 0) + (blockState3.isCollisionShapeFullBlock(blockGetter, blockPos5) ? 1 : 0) + (blockState4.isCollisionShapeFullBlock(blockGetter, blockPos6) ? 1 : 0);
+     *     boolean bl = blockState.is(this) && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
+     *     boolean bl2 = blockState3.is(this) && blockState3.getValue(HALF) == DoubleBlockHalf.LOWER;
+     *     if ((!bl || bl2) && i <= 0) {
+     *         if ((!bl2 || bl) && i >= 0) {
+     *             int j = direction.getStepX();
+     *             int k = direction.getStepZ();
+     *             Vec3 vec3 = arg.getClickLocation();
+     *             double d = vec3.x - (double)blockPos.getX();
+     *             double e = vec3.z - (double)blockPos.getZ();
+     *             return (j >= 0 || !(e < (double)0.5F)) && (j <= 0 || !(e > (double)0.5F)) && (k >= 0 || !(d > (double)0.5F)) && (k <= 0 || !(d < (double)0.5F)) ? DoorHingeSide.LEFT : DoorHingeSide.RIGHT;
+     *         } else {
+     *             return DoorHingeSide.LEFT;
+     *         }
+     *     } else {
+     *         return DoorHingeSide.RIGHT;
+     *     }
+     * }
+     * }
+     * </pre>
      * @param callback The callback instance
      * @return The hinge side
+     * @see DoorBlock#getHinge(BlockPlaceContext)
      */
     private DoorHingeSide getHinge(BlockStateModifyPlacementCallbackJS callback) {
-        // This is a simplified version of the complex hinge determination logic
-        // The full implementation would need access to the block getter and click location
-        return DoorHingeSide.LEFT; // Simplified for now
+        BlockGetter level = callback.getLevel();
+        BlockPos clickedPos = callback.getClickedPos();
+        Direction doorFacing = callback.getHorizontalDirection();
+        BlockPos upperPos = clickedPos.above();
+        
+        // Check counter-clockwise direction (left side)
+        Direction leftDirection = doorFacing.getCounterClockWise();
+        BlockPos leftLowerPos = clickedPos.relative(leftDirection);
+        BlockState leftLowerState = level.getBlockState(leftLowerPos);
+        BlockPos leftUpperPos = upperPos.relative(leftDirection);
+        BlockState leftUpperState = level.getBlockState(leftUpperPos);
+        
+        // Check clockwise direction (right side)
+        Direction rightDirection = doorFacing.getClockWise();
+        BlockPos rightLowerPos = clickedPos.relative(rightDirection);
+        BlockState rightLowerState = level.getBlockState(rightLowerPos);
+        BlockPos rightUpperPos = upperPos.relative(rightDirection);
+        BlockState rightUpperState = level.getBlockState(rightUpperPos);
+        
+        // Calculate collision weight based on surrounding blocks
+        int collisionWeight = (leftLowerState.isCollisionShapeFullBlock(level, leftLowerPos) ? -1 : 0) + 
+                             (leftUpperState.isCollisionShapeFullBlock(level, leftUpperPos) ? -1 : 0) + 
+                             (rightLowerState.isCollisionShapeFullBlock(level, rightLowerPos) ? 1 : 0) + 
+                             (rightUpperState.isCollisionShapeFullBlock(level, rightUpperPos) ? 1 : 0);
+        
+        // Check if there are existing doors on left and right sides
+        boolean hasLeftDoor = leftLowerState.is(callback.getState().getBlock()) && 
+                             leftLowerState.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER;
+        boolean hasRightDoor = rightLowerState.is(callback.getState().getBlock()) && 
+                              rightLowerState.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER;
+        
+        if ((!hasLeftDoor || hasRightDoor) && collisionWeight <= 0) {
+            if ((!hasRightDoor || hasLeftDoor) && collisionWeight >= 0) {
+                // Use click position to determine hinge side
+                int facingStepX = doorFacing.getStepX();
+                int facingStepZ = doorFacing.getStepZ();
+                Vec3 clickLocation = callback.getClickLocation();
+                double clickOffsetX = clickLocation.x - (double)clickedPos.getX();
+                double clickOffsetZ = clickLocation.z - (double)clickedPos.getZ();
+                
+                // Determine hinge based on click position relative to door center
+                boolean clickOnLeft = (facingStepX >= 0 || !(clickOffsetZ < 0.5F)) && 
+                                     (facingStepX <= 0 || !(clickOffsetZ > 0.5F)) && 
+                                     (facingStepZ >= 0 || !(clickOffsetX > 0.5F)) && 
+                                     (facingStepZ <= 0 || !(clickOffsetX < 0.5F));
+                
+                return clickOnLeft ? DoorHingeSide.LEFT : DoorHingeSide.RIGHT;
+            } else {
+                return DoorHingeSide.LEFT;
+            }
+        } else {
+            return DoorHingeSide.RIGHT;
+        }
     }
 
     /**
@@ -665,6 +776,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param callback The callback instance
      * @return The determined stairs shape
+     * @see StairBlock#getStairsShape(BlockState, BlockGetter, BlockPos)
      */
     private static StairsShape getStairsShape(BlockStateModifyPlacementCallbackJS callback) {
         var blockState = callback.getState();
@@ -716,6 +828,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param blockPos The position
      * @param direction The direction to check
      * @return true if the block can take the shape
+     * @see StairBlock#canTakeShape(BlockState, BlockGetter, BlockPos, Direction)
      */
     private static boolean canTakeShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
         BlockState blockState2 = blockGetter.getBlockState(blockPos.relative(direction));
@@ -925,10 +1038,10 @@ public class BlockStateModifyPlacementCallbackPresets {
         var state = callback
             .minecraftBlock
             .defaultBlockState()
-            .setValue(FenceBlock.NORTH, connectsTo(northState, northState.isFaceSturdy(blockGetter, northPos, Direction.SOUTH), Direction.SOUTH, callback.getState()))
-            .setValue(FenceBlock.EAST, connectsTo(eastState, eastState.isFaceSturdy(blockGetter, eastPos, Direction.WEST), Direction.WEST, callback.getState()))
-            .setValue(FenceBlock.SOUTH, connectsTo(southState, southState.isFaceSturdy(blockGetter, southPos, Direction.NORTH), Direction.NORTH, callback.getState()))
-            .setValue(FenceBlock.WEST, connectsTo(westState, westState.isFaceSturdy(blockGetter, westPos, Direction.EAST), Direction.EAST, callback.getState()))
+            .setValue(FenceBlock.NORTH, connectsToFence(northState, northState.isFaceSturdy(blockGetter, northPos, Direction.SOUTH), Direction.SOUTH, callback.getState()))
+            .setValue(FenceBlock.EAST, connectsToFence(eastState, eastState.isFaceSturdy(blockGetter, eastPos, Direction.WEST), Direction.WEST, callback.getState()))
+            .setValue(FenceBlock.SOUTH, connectsToFence(southState, southState.isFaceSturdy(blockGetter, southPos, Direction.NORTH), Direction.NORTH, callback.getState()))
+            .setValue(FenceBlock.WEST, connectsToFence(westState, westState.isFaceSturdy(blockGetter, westPos, Direction.EAST), Direction.EAST, callback.getState()))
             .setValue(FenceBlock.WATERLOGGED, waterlogged);
 
         overrideState(callback, state);
@@ -954,11 +1067,13 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param direction The direction to check
      * @param defaultState The default state of the fence being placed
      * @return true if the fence connects to the block
+     * @see FenceBlock#connectsTo(BlockState, boolean, Direction)
      */
-    private boolean connectsTo(BlockState blockState, boolean isSturdyFace, Direction direction, BlockState defaultState) {
+    private boolean connectsToFence(BlockState blockState, boolean isSturdyFace, Direction direction, BlockState defaultState) {
         boolean isSameFence = this.isSameFence(blockState, defaultState);
         // Uses tag instead of instanceof to allow for custom fence gates
-        boolean isFenceGate = blockState.is(BlockTags.FENCE_GATES) && FenceGateBlock.connectsToDirection(blockState, direction);
+        boolean isFenceGate = blockState.is(BlockTags.FENCE_GATES) &&
+            FenceGateBlock.connectsToDirection(blockState, direction);
         return !isExceptionForConnection(blockState) && isSturdyFace || isSameFence || isFenceGate;
     }
 
@@ -977,6 +1092,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param blockState The block state to check
      * @param defaultState The default state of the fence being placed
      * @return true if the block is the same type of fence
+     * @see FenceBlock#isSameFence(BlockState)
      */
     private boolean isSameFence(BlockState blockState, BlockState defaultState) {
         return blockState.is(BlockTags.FENCES)
@@ -998,6 +1114,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      *
      * @param blockState The block state to check
      * @return true if the block is an exception for fence connection
+     * @see Block#isExceptionForConnection(BlockState)
      */
     private boolean isExceptionForConnection(BlockState blockState) {
         // Uses tag instead of instanceof to allow for custom leaves
@@ -1057,12 +1174,258 @@ public class BlockStateModifyPlacementCallbackPresets {
 
     /**
      * Helper method to check if a block is a wall (used by fence gate)
-     *
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private boolean isWall(BlockState blockState) {
+     *     return blockState.is(BlockTags.WALLS);
+     * }
+     * }
+     * </pre>
      * @param blockState The block state to check
      * @return true if the block is a wall
+     * @see FenceGateBlock#isWall(BlockState)
      */
     private boolean isWall(BlockState blockState) {
         return blockState.is(BlockTags.WALLS);
+    }
+
+    /**
+     * Helper method that mirrors the connectsTo logic from WallBlock
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private boolean connectsTo(BlockState arg, boolean bl, Direction arg2) {
+     *     Block block = arg.getBlock();
+     *     boolean bl2 = block instanceof FenceGateBlock && FenceGateBlock.connectsToDirection(arg, arg2);
+     *     return arg.is(BlockTags.WALLS) || !isExceptionForConnection(arg) && bl || block instanceof IronBarsBlock || bl2;
+     * }
+     * }
+     * </pre>
+     * @param blockState The block state to check
+     * @param isSturdyFace Whether the face is sturdy
+     * @param direction The direction to check
+     * @param defaultState The default state of the wall being placed
+     * @return true if the wall connects to the block
+     * @see WallBlock#connectsTo(BlockState, boolean, Direction)
+     */
+    private boolean connectsToWall(BlockState blockState, boolean isSturdyFace, Direction direction, BlockState defaultState) {
+        Block block = blockState.getBlock();
+        // Uses tag instead of instanceof to allow for custom fence gates
+        boolean isFenceGate = blockState.is(BlockTags.FENCE_GATES) &&
+            FenceGateBlock.connectsToDirection(blockState, direction);
+        boolean isIronBars = block instanceof IronBarsBlock;
+        return blockState.is(BlockTags.WALLS) ||
+            (!isExceptionForConnection(blockState) && isSturdyFace) ||
+            isIronBars ||
+            isFenceGate;
+    }
+
+    /**
+     * Represents the implementation within {@link WallBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext arg) {
+     *     LevelReader levelReader = arg.getLevel();
+     *     BlockPos blockPos = arg.getClickedPos();
+     *     FluidState fluidState = arg.getLevel().getFluidState(arg.getClickedPos());
+     *     BlockPos blockPos2 = blockPos.north();
+     *     BlockPos blockPos3 = blockPos.east();
+     *     BlockPos blockPos4 = blockPos.south();
+     *     BlockPos blockPos5 = blockPos.west();
+     *     BlockPos blockPos6 = blockPos.above();
+     *     BlockState blockState = levelReader.getBlockState(blockPos2);
+     *     BlockState blockState2 = levelReader.getBlockState(blockPos3);
+     *     BlockState blockState3 = levelReader.getBlockState(blockPos4);
+     *     BlockState blockState4 = levelReader.getBlockState(blockPos5);
+     *     BlockState blockState5 = levelReader.getBlockState(blockPos6);
+     *     boolean bl = this.connectsTo(blockState, blockState.isFaceSturdy(levelReader, blockPos2, Direction.SOUTH), Direction.SOUTH);
+     *     boolean bl2 = this.connectsTo(blockState2, blockState2.isFaceSturdy(levelReader, blockPos3, Direction.WEST), Direction.WEST);
+     *     boolean bl3 = this.connectsTo(blockState3, blockState3.isFaceSturdy(levelReader, blockPos4, Direction.NORTH), Direction.NORTH);
+     *     boolean bl4 = this.connectsTo(blockState4, blockState4.isFaceSturdy(levelReader, blockPos5, Direction.EAST), Direction.EAST);
+     *     BlockState blockState6 = (BlockState)this.defaultBlockState().setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+     *     return this.updateShape(levelReader, blockState6, blockPos6, blockState5, bl, bl2, bl3, bl4);
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public void wall(BlockStateModifyPlacementCallbackJS callback) {
+        LevelReader levelReader = callback.getLevel();
+        BlockPos blockPos = callback.getClickedPos();
+        boolean waterlogged = callback.isInWater();
+
+        BlockPos northPos = blockPos.north();
+        BlockPos eastPos = blockPos.east();
+        BlockPos southPos = blockPos.south();
+        BlockPos westPos = blockPos.west();
+        BlockPos abovePos = blockPos.above();
+
+        BlockState northState = levelReader.getBlockState(northPos);
+        BlockState eastState = levelReader.getBlockState(eastPos);
+        BlockState southState = levelReader.getBlockState(southPos);
+        BlockState westState = levelReader.getBlockState(westPos);
+        BlockState aboveState = levelReader.getBlockState(abovePos);
+
+        boolean northConnects = connectsToWall(northState, northState.isFaceSturdy(levelReader, northPos, Direction.SOUTH), Direction.SOUTH, callback.getState());
+        boolean eastConnects = connectsToWall(eastState, eastState.isFaceSturdy(levelReader, eastPos, Direction.WEST), Direction.WEST, callback.getState());
+        boolean southConnects = connectsToWall(southState, southState.isFaceSturdy(levelReader, southPos, Direction.NORTH), Direction.NORTH, callback.getState());
+        boolean westConnects = connectsToWall(westState, westState.isFaceSturdy(levelReader, westPos, Direction.EAST), Direction.EAST, callback.getState());
+
+        // Set waterlogged property
+        callback.setValue(WallBlock.WATERLOGGED, waterlogged);
+
+        // Update wall sides based on connections
+        updateWallSides(callback, northConnects, eastConnects, southConnects, westConnects, aboveState.getCollisionShape(levelReader, abovePos));
+        
+        // Set the UP property based on whether the post should be raised
+        boolean shouldRaisePost = shouldRaiseWallPost(callback.getState(), aboveState, aboveState.getCollisionShape(levelReader, abovePos));
+        callback.setValue(WallBlock.UP, shouldRaisePost);
+    }
+
+    /**
+     * Helper method to update wall sides based on connections
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private BlockState updateSides(BlockState arg, boolean bl, boolean bl2, boolean bl3, boolean bl4, VoxelShape arg2) {
+     *     return (BlockState)((BlockState)((BlockState)((BlockState)arg.setValue(NORTH_WALL, this.makeWallState(bl, arg2, NORTH_TEST))).setValue(EAST_WALL, this.makeWallState(bl2, arg2, EAST_TEST))).setValue(SOUTH_WALL, this.makeWallState(bl3, arg2, SOUTH_TEST))).setValue(WEST_WALL, this.makeWallState(bl4, arg2, WEST_TEST));
+     * }
+     * }
+     * </pre>
+     * @param callback The callback instance
+     * @param northConnects Whether north side connects
+     * @param eastConnects Whether east side connects
+     * @param southConnects Whether south side connects
+     * @param westConnects Whether west side connects
+     * @param aboveShape The collision shape of the block above
+     * @see WallBlock#updateSides(BlockState, boolean, boolean, boolean, boolean, VoxelShape)
+     */
+    private void updateWallSides(BlockStateModifyPlacementCallbackJS callback, boolean northConnects, boolean eastConnects, boolean southConnects, boolean westConnects, VoxelShape aboveShape) {
+        // Create simple test shapes for wall connections
+        VoxelShape northTest = Block.box(7, 0, 0, 9, 16, 8);
+        VoxelShape eastTest = Block.box(8, 0, 7, 16, 16, 9);
+        VoxelShape southTest = Block.box(7, 0, 8, 9, 16, 16);
+        VoxelShape westTest = Block.box(0, 0, 7, 8, 16, 9);
+        
+        callback
+            .setValue(WallBlock.NORTH_WALL, makeWallState(northConnects, aboveShape, northTest))
+            .setValue(WallBlock.EAST_WALL, makeWallState(eastConnects, aboveShape, eastTest))
+            .setValue(WallBlock.SOUTH_WALL, makeWallState(southConnects, aboveShape, southTest))
+            .setValue(WallBlock.WEST_WALL, makeWallState(westConnects, aboveShape, westTest));
+    }
+
+    /**
+     * Helper method to determine wall side state
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private WallSide makeWallState(boolean bl, VoxelShape arg, VoxelShape arg2) {
+     *     if (bl) {
+     *         return isCovered(arg, arg2) ? WallSide.TALL : WallSide.LOW;
+     *     } else {
+     *         return WallSide.NONE;
+     *     }
+     * }
+     * }
+     * </pre>
+     * @param connects Whether the side connects
+     * @param aboveShape The collision shape of the block above
+     * @param testShape The test shape for this direction
+     * @return The wall side state
+     * @see WallBlock#makeWallState(boolean, VoxelShape, VoxelShape)
+     */
+    private WallSide makeWallState(boolean connects, VoxelShape aboveShape, VoxelShape testShape) {
+        if (connects) {
+            return isCovered(aboveShape, testShape) ? WallSide.TALL : WallSide.LOW;
+        } else {
+            return WallSide.NONE;
+        }
+    }
+
+    /**
+     * Helper method to check if a shape is covered by another
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private static boolean isCovered(VoxelShape arg, VoxelShape arg2) {
+     *     return !Shapes.joinIsNotEmpty(arg2, arg, BooleanOp.ONLY_FIRST);
+     * }
+     * }
+     * </pre>
+     * @param shape1 First shape
+     * @param shape2 Second shape
+     * @return true if shape1 is covered by shape2
+     * @see WallBlock#isCovered(VoxelShape, VoxelShape)
+     */
+    private boolean isCovered(VoxelShape shape1, VoxelShape shape2) {
+        return !shape1.isEmpty() && !shape2.isEmpty() && shape1.bounds().intersects(shape2.bounds());
+    }
+
+    /**
+     * Helper method to determine if the wall post should be raised
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * private boolean shouldRaisePost(BlockState arg, BlockState arg2, VoxelShape arg3) {
+     *     boolean bl = arg2.getBlock() instanceof WallBlock && (Boolean)arg2.getValue(UP);
+     *     if (bl) {
+     *         return true;
+     *     } else {
+     *         WallSide wallSide = (WallSide)arg.getValue(NORTH_WALL);
+     *         WallSide wallSide2 = (WallSide)arg.getValue(SOUTH_WALL);
+     *         WallSide wallSide3 = (WallSide)arg.getValue(EAST_WALL);
+     *         WallSide wallSide4 = (WallSide)arg.getValue(WEST_WALL);
+     *         boolean bl2 = wallSide2 == WallSide.NONE;
+     *         boolean bl3 = wallSide4 == WallSide.NONE;
+     *         boolean bl4 = wallSide3 == WallSide.NONE;
+     *         boolean bl5 = wallSide == WallSide.NONE;
+     *         boolean bl6 = bl5 && bl2 && bl3 && bl4 || bl5 != bl2 || bl3 != bl4;
+     *         if (bl6) {
+     *             return true;
+     *         } else {
+     *             return arg2.is(BlockTags.WALL_POST_OVERRIDE) || isCovered(arg3, POST_TEST);
+     *         }
+     *     }
+     * }
+     * }
+     * </pre>
+     * @param state The current block state
+     * @param aboveState The block state above
+     * @param aboveShape The collision shape of the block above
+     * @return true if the post should be raised
+     * @see WallBlock#shouldRaisePost(BlockState, BlockState, VoxelShape)
+     */
+    private boolean shouldRaiseWallPost(BlockState state, BlockState aboveState, VoxelShape aboveShape) {
+        // Check if the block above is a wall with UP=true
+        if (aboveState.getBlock() instanceof WallBlock && aboveState.getValue(WallBlock.UP)) {
+            return true;
+        }
+
+        // Check wall side states
+        WallSide northSide = state.getValue(WallBlock.NORTH_WALL);
+        WallSide southSide = state.getValue(WallBlock.SOUTH_WALL);
+        WallSide eastSide = state.getValue(WallBlock.EAST_WALL);
+        WallSide westSide = state.getValue(WallBlock.WEST_WALL);
+
+        boolean northNone = northSide == WallSide.NONE;
+        boolean southNone = southSide == WallSide.NONE;
+        boolean eastNone = eastSide == WallSide.NONE;
+        boolean westNone = westSide == WallSide.NONE;
+
+        // Raise post if all sides are none, or if there's an imbalance
+        return (northNone && southNone && eastNone && westNone) || 
+               (northNone != southNone) || 
+               (eastNone != westNone);
     }
 
 
