@@ -14,15 +14,43 @@ import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.BellBlock;
+import net.minecraft.world.level.block.BigDripleafBlock;
+import net.minecraft.world.level.block.BlastFurnaceBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BrewingStandBlock;
 import net.minecraft.world.level.block.CalibratedSculkSensorBlock;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.ChainBlock;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.ChiseledBookShelfBlock;
+import net.minecraft.world.level.block.CocoaBlock;
+import net.minecraft.world.level.block.CommandBlock;
+import net.minecraft.world.level.block.ComparatorBlock;
+import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.ConcretePowderBlock;
+import net.minecraft.world.level.block.ConduitBlock;
+import net.minecraft.world.level.block.CoralBlock;
+import net.minecraft.world.level.block.CoralFanBlock;
+import net.minecraft.world.level.block.CoralPlantBlock;
+import net.minecraft.world.level.block.CoralWallFanBlock;
+import net.minecraft.world.level.block.CraftingTableBlock;
+import net.minecraft.world.level.block.DaylightDetectorBlock;
+import net.minecraft.world.level.block.DeadBushBlock;
+import net.minecraft.world.level.block.DecoratedPotBlock;
 import net.minecraft.world.level.block.DetectorRailBlock;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.DropperBlock;
+import net.minecraft.world.level.block.EnderChestBlock;
+import net.minecraft.world.level.block.EndPortalFrameBlock;
+import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.GlazedTerracottaBlock;
+import net.minecraft.world.level.block.HangingRootsBlock;
+import net.minecraft.world.level.block.HugeMushroomBlock;
+import net.minecraft.world.level.block.InfestedRotatedPillarBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.EndRodBlock;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
@@ -72,6 +100,59 @@ public class BlockStateModifyPlacementCallbackPresets {
 
     private static void overrideState(BlockStateModifyPlacementCallbackJS callback, BlockState newState) {
         ((BlockStateModifyCallbackJSAccessor) callback).presetJS$setState(newState);
+    }
+
+    /**
+     * A common pattern for blocks that face opposite the player when placed.
+     * @param callback The callback instance
+     * @param facingProperty The facing property to set
+     */
+    public static void facingOppositeOfHorizontalDirection(BlockStateModifyPlacementCallbackJS callback, DirectionProperty facingProperty) {
+        overrideState(callback, callback.minecraftBlock.defaultBlockState().setValue(facingProperty, callback.getHorizontalDirection().getOpposite()));
+    }
+
+    /**
+     * A common pattern for blocks that can be waterlogged.
+     * @param callback The callback instance
+     * @param waterloggedProperty The waterlogged property to set
+     */
+    public static void waterLogged(BlockStateModifyPlacementCallbackJS callback, BooleanProperty waterloggedProperty) {
+        overrideState(callback, callback.minecraftBlock.defaultBlockState().setValue(waterloggedProperty, callback.isInWater()));
+    }
+
+    /**
+     * A common pattern for blocks that face the direction the player clicked when placed.
+     * @param callback The callback instance
+     * @param facingProperty The facing property to set
+     */
+    public static void clickedFace(BlockStateModifyPlacementCallbackJS callback, DirectionProperty facingProperty) {
+        overrideState(callback, callback.minecraftBlock.defaultBlockState().setValue(facingProperty, callback.getClickedFace()));
+    }
+
+    /**
+     * A common pattern for blocks that face the opposite of the nearest looking direction when placed.
+     * @param callback The callback instance
+     * @param facingProperty The facing property to set
+     */
+    public static void oppositeNearestLookingDirection(BlockStateModifyPlacementCallbackJS callback, DirectionProperty facingProperty) {
+        overrideState(callback, callback.minecraftBlock.defaultBlockState().setValue(facingProperty, callback.getNearestLookingDirection().getOpposite()));
+    }
+
+    /**
+     * A common pattern for blocks that face the direction the player clicked when placed, but also waterloggable.
+     * @param callback The callback instance
+     * @param facingProperty The facing property to set
+     * @param waterloggedProperty The waterlogged property to set
+     */
+    public static void clickedFaceAndWaterLogged(BlockStateModifyPlacementCallbackJS callback, DirectionProperty facingProperty, BooleanProperty waterloggedProperty) {
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(facingProperty, callback.getClickedFace())
+                .setValue(waterloggedProperty, callback.isInWater())
+        );
     }
 
     /**
@@ -138,7 +219,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param callback The callback instance
      */
     public static void furnace(BlockStateModifyPlacementCallbackJS callback) {
-        overrideState(callback, callback.minecraftBlock.defaultBlockState().setValue(AbstractFurnaceBlock.FACING, callback.getHorizontalDirection().getOpposite()));
+        facingOppositeOfHorizontalDirection(callback, AbstractFurnaceBlock.FACING);
     }
 
     /**
@@ -159,14 +240,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param callback The callback instance
      */
     public static void amethystCluster(BlockStateModifyPlacementCallbackJS callback) {
-        overrideState(
-            callback,
-                callback
-                    .minecraftBlock
-                    .defaultBlockState()
-                    .setValue(AmethystClusterBlock.WATERLOGGED, callback.isInWater())
-                    .setValue(AmethystClusterBlock.FACING, callback.getClickedFace())
-        );
+        clickedFaceAndWaterLogged(callback, AmethystClusterBlock.FACING, AmethystClusterBlock.WATERLOGGED);
     }
 
     /**
@@ -187,13 +261,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param callback The callback instance
      */
     public static void sculkSensor(BlockStateModifyPlacementCallbackJS callback) {
-        overrideState(
-            callback,
-            callback
-                .minecraftBlock
-                .defaultBlockState()
-                .setValue(SculkSensorBlock.WATERLOGGED, callback.isInWater())
-        );
+        waterLogged(callback, SculkSensorBlock.WATERLOGGED);
     }
 
     /**
@@ -284,13 +352,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param callback The callback instance
      */
     public static void barrel(BlockStateModifyPlacementCallbackJS callback) {
-        overrideState(
-            callback,
-            callback
-                .minecraftBlock
-                .defaultBlockState()
-                .setValue(BarrelBlock.FACING, callback.getNearestLookingDirection().getOpposite())
-        );
+        oppositeNearestLookingDirection(callback, BarrelBlock.FACING);
     }
 
     /**
@@ -308,13 +370,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param callback The callback instance
      */
     public static void dispenser(BlockStateModifyPlacementCallbackJS callback) {
-        overrideState(
-            callback,
-            callback
-                .minecraftBlock
-                .defaultBlockState()
-                .setValue(DispenserBlock.FACING, callback.getNearestLookingDirection().getOpposite())
-        );
+        oppositeNearestLookingDirection(callback, DispenserBlock.FACING);
     }
 
     /**
@@ -1632,15 +1688,33 @@ public class BlockStateModifyPlacementCallbackPresets {
             overrideState(callback, existingState.cycle(CandleBlock.CANDLES));
         } else {
             // Place new candle with waterlogging
-            boolean waterlogged = callback.isInWater();
-            overrideState(
-                callback,
-                callback
-                    .minecraftBlock
-                    .defaultBlockState()
-                    .setValue(CandleBlock.WATERLOGGED, waterlogged)
-            );
+            waterLogged(callback, CandleBlock.WATERLOGGED);
         }
+    }
+
+    /**
+     * Represents the implementation within {@link RotatedPillarBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+     *     return (BlockState)this.defaultBlockState().setValue(AXIS, blockPlaceContext.getClickedFace().getAxis());
+     * }
+     * }
+     * </pre>
+     *
+     * @param callback The callback instance
+     */
+    public static void rotatedPillar(BlockStateModifyPlacementCallbackJS callback) {
+        Direction.Axis axis = callback.getClickedFace().getAxis();
+        overrideState(
+            callback,
+            callback
+                .minecraftBlock
+                .defaultBlockState()
+                .setValue(RotatedPillarBlock.AXIS, axis)
+        );
     }
 
     /**
@@ -1661,14 +1735,8 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @param callback The callback instance
      */
     public static void chain(BlockStateModifyPlacementCallbackJS callback) {
-        boolean waterlogged = callback.isInWater();
-        overrideState(
-            callback,
-            callback
-                .minecraftBlock
-                .defaultBlockState()
-                .setValue(ChainBlock.WATERLOGGED, waterlogged)
-        );
+        rotatedPillar(callback);// Super call to set AXIS
+        callback.setValue(ChainBlock.WATERLOGGED, callback.isInWater());
     }
 
     /**
@@ -1787,7 +1855,7 @@ public class BlockStateModifyPlacementCallbackPresets {
      * @return The determined instrument
      * @see NoteBlock#setInstrument(LevelAccessor, BlockPos, BlockState)
      */
-    private static NoteBlockInstrument setNoteBlockInstrument(LevelReader level, BlockPos pos) {
+    private static NoteBlockInstrument setNoteBlockInstrument(BlockGetter level, BlockPos pos) {
         NoteBlockInstrument aboveInstrument = level.getBlockState(pos.above()).instrument();
         if (aboveInstrument.worksAboveNoteBlock()) {
             return aboveInstrument;
