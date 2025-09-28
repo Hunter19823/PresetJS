@@ -13,7 +13,6 @@ displayURL="https://github.com/Hunter19823/PresetJS"
 description = '''
 A KubeJS Addon for adding additional Presets
 '''
-#logoFile = ""
 
 [[dependencies.presetjs]]
 modId = "forge"
