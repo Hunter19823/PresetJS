@@ -67,11 +67,11 @@ import static net.minecraft.world.level.block.StairBlock.isStairs;
 public class BlockStateModifyPlacementCallbackPresets {
 
     private static void setStateToNull(BlockStateModifyPlacementCallbackJS callback) {
-        ((BlockStateModifyCallbackJSAccessor) callback).setState(null);
+        overrideState(callback, null);
     }
 
     private static void overrideState(BlockStateModifyPlacementCallbackJS callback, BlockState newState) {
-        ((BlockStateModifyCallbackJSAccessor) callback).setState(newState);
+        ((BlockStateModifyCallbackJSAccessor) callback).presetJS$setState(newState);
     }
 
     /**
