@@ -1,4 +1,4 @@
-package pie.ilikepiefoo.presetjs.preset.block;
+package pie.ilikepiefoo.presetjs.preset;
 
 import dev.latvian.mods.kubejs.block.callbacks.BlockStateModifyPlacementCallbackJS;
 import net.minecraft.core.BlockPos;
