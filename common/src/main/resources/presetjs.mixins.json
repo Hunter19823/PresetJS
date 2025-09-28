@@ -6,6 +6,7 @@
   "client": [
   ],
   "mixins": [
+    "BlockStateModifyCallbackJSAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
