@@ -14,6 +14,30 @@ public class BlockStateModifyPlacementCallbackPresets {
 
     /**
      * Represents the implementation within {@link FaceAttachedHorizontalDirectionalBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * @Nullable
+     * public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+     *     for(Direction direction : blockPlaceContext.getNearestLookingDirections()) {
+     *         BlockState blockState;
+     *         if (direction.getAxis() == Axis.Y) {
+     *             blockState = (BlockState)((BlockState)this.defaultBlockState().setValue(FACE, direction == Direction.UP ? AttachFace.CEILING : AttachFace.FLOOR)).setValue(FACING, blockPlaceContext.getHorizontalDirection());
+     *         } else {
+     *             blockState = (BlockState)((BlockState)this.defaultBlockState().setValue(FACE, AttachFace.WALL)).setValue(FACING, direction.getOpposite());
+     *         }
+     *
+     *         if (blockState.canSurvive(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos())) {
+     *             return blockState;
+     *         }
+     *     }
+     *
+     *     return null;
+     * }
+     * }
+     * </pre>
+     *
      * @param callback The callback instance
      */
     public void faceAttachedHorizontalDirectionalBlock(BlockStateModifyPlacementCallbackJS callback) {
@@ -37,6 +61,15 @@ public class BlockStateModifyPlacementCallbackPresets {
 
     /**
      * Represents the implementation within {@link AbstractFurnaceBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+     *     return (BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
+     * }
+     * }
+     * </pre>
      * @param callback The callback instance
      */
     public void furnace(BlockStateModifyPlacementCallbackJS callback) {
@@ -45,6 +78,18 @@ public class BlockStateModifyPlacementCallbackPresets {
 
     /**
      * Represents the implementation within {@link AmethystClusterBlock#getStateForPlacement(BlockPlaceContext)}
+     * <br>
+     * Code for Reference:
+     * <pre>
+     * {@code
+     * @Nullable
+     * public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+     *     LevelAccessor levelAccessor = blockPlaceContext.getLevel();
+     *     BlockPos blockPos = blockPlaceContext.getClickedPos();
+     *     return (BlockState)((BlockState)this.defaultBlockState().setValue(WATERLOGGED, levelAccessor.getFluidState(blockPos).getType() == Fluids.WATER)).setValue(FACING, blockPlaceContext.getClickedFace());
+     * }
+     * }
+     * </pre>
      * @param callback The callback instance
      */
     public void amethystCluster(BlockStateModifyPlacementCallbackJS callback) {
